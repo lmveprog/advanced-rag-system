@@ -1,12 +1,12 @@
-# Advanced RAG System — License Intelligence Chatbot
+# Advanced RAG System — Intelligent Chatbot
 
-> Ask questions about ~2000 software licenses in plain language. No SQL, no spreadsheet hunting.
+> Ask questions about ~2000 software licenses in plain language.
 
 ---
 
 ## The idea
 
-A company manages roughly 2000 software licenses split between EU and US clients. Each license has two layers of information:
+A company manages roughly thousand of software licenses split between EU and US clients. Each license has two layers of information:
 
 - **Structured metadata** in CSV files — company name, contact, status, expiration date, SLA level, payment status, department, risk rating, etc.
 - **A PDF contract** with the actual legal text — termination clauses, audit terms, data residency, etc.
@@ -27,7 +27,7 @@ The interesting part is that not every question is answered the same way. There 
 | `SQL` | Filter, count, sort, or search by any field (VAT number, email, company…) | LLM generates a SQL query → runs on DuckDB |
 | `VECTOR` | Question is about the *content* of a contract | Semantic search in ChromaDB over PDF chunks |
 | `HYBRID` | Needs both structured data and contract content | SQL + vector search combined |
-| `GLOSSARY` | Asking what a field means ("what is Risk Rating?") | Answered from a static dictionary |
+| `GLOSSARY` | Asking what a field means ("what is Risk Rating?") | Answered from a static dictionary detailed by internal team |
 
 The classification itself is done by calling Mistral with a short prompt. It's not a fancy classifier — just a zero-shot LLM call that's surprisingly reliable once the examples in the prompt are specific enough.
 
@@ -41,7 +41,7 @@ For vector searches, the system generates 3 rephrased versions of the question b
 User question
     │
     ▼
-classify()          ← Mistral decides the route
+classify()          ← the LLM decides the route
     │
     ├─ LOOKUP   → DuckDB: SELECT * WHERE "License ID" = ?
     ├─ SQL      → Mistral generates SQL → DuckDB
@@ -58,7 +58,7 @@ JSON response:  answer · category · pdf_links · confidence · raw context
 
 ---
 
-## Stack
+## My Stack
 
 | What | Tool |
 |------|------|
@@ -105,16 +105,18 @@ No frontend framework, no separate build step — the entire UI is served from a
 git clone https://github.com/lmveprog/advanced-rag-system
 cd advanced-rag-system
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate  # on windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
 **2. Configure `.env`**
 ```
-MISTRAL_API_KEY=your_key_here
+MISTRAL_API_KEY=your_key_here 
 LLM_MODEL=mistral-small-latest
 DATA_DIR=./data
 ```
+
+# https://console.mistral.ai/upgrade/plans you can firstly setup your project on Mistral AI Studio with experiment plan (Free)
 
 **3. Build the database** — only needed once, or when CSVs change
 ```bash
