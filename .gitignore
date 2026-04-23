@@ -1,9 +1,11 @@
 .env
 .DS_Store
+data/.DS_Store
 __pycache__/
 *.pyc
 *.pyo
+*.db
 .venv/
 data/chroma/
 data/master.duckdb
-*.db
+*.ipynb
