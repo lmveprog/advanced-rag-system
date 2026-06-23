@@ -1,4 +1,4 @@
-# Advanced RAG System — Intelligent Chatbot
+# Advanced RAG System - Intelligent Chatbot
 
 > Ask questions about ~2000 software licenses in plain language.
 
@@ -8,12 +8,12 @@
 
 A company manages roughly thousand of software licenses split between EU and US clients. Each license has two layers of information:
 
-- **Structured metadata** in CSV files — company name, contact, status, expiration date, SLA level, payment status, department, risk rating, etc.
-- **A PDF contract** with the actual legal text — termination clauses, audit terms, data residency, etc.
+- **Structured metadata** in CSV files - company name, contact, status, expiration date, SLA level, payment status, department, risk rating, etc.
+- **A PDF contract** with the actual legal text - termination clauses, audit terms, data residency, etc.
 
 Before this, finding anything meant opening a spreadsheet, filtering columns, then manually opening PDFs. This chatbot replaces that whole process with a single text input.
 
-You type something like *"which licenses in the engineering department expire this year?"* or *"what does EU-A-A1-000003 say about cancellation?"* — and it figures out where to look, retrieves the data, and writes a plain-language answer.
+You type something like *"which licenses in the engineering department expire this year?"* or *"what does EU-A-A1-000003 say about cancellation?"* - and it figures out where to look, retrieves the data, and writes a plain-language answer.
 
 ---
 
@@ -29,7 +29,7 @@ The interesting part is that not every question is answered the same way. There 
 | `HYBRID` | Needs both structured data and contract content | SQL + vector search combined |
 | `GLOSSARY` | Asking what a field means ("what is Risk Rating?") | Answered from a static dictionary detailed by internal team |
 
-The classification itself is done by calling Mistral with a short prompt. It's not a fancy classifier — just a zero-shot LLM call that's surprisingly reliable once the examples in the prompt are specific enough.
+The classification itself is done by calling Mistral with a short prompt. It's not a fancy classifier - just a zero-shot LLM call that's surprisingly reliable once the examples in the prompt are specific enough.
 
 For vector searches, the system generates 3 rephrased versions of the question before searching (multi-query RAG). This increases recall because the same concept can be phrased differently across contracts.
 
@@ -66,11 +66,11 @@ JSON response:  answer · category · pdf_links · confidence · raw context
 | Structured DB | DuckDB |
 | Vector DB | ChromaDB |
 | Embeddings | `Qwen/Qwen3-Embedding-0.6B` via SentenceTransformers |
-| LLM | Mistral API (`mistral-small-latest`) — via OpenAI-compatible client |
+| LLM | Mistral API (`mistral-small-latest`) - via OpenAI-compatible client |
 | PDF extraction | pdfplumber (native) + pytesseract (scanned PDFs) |
 | Frontend | Vanilla HTML/CSS/JS, embedded directly in `app.py` |
 
-No frontend framework, no separate build step — the entire UI is served from a single Python string. It keeps deployment simple.
+No frontend framework, no separate build step - the entire UI is served from a single Python string. It keeps deployment simple.
 
 ---
 
@@ -118,12 +118,12 @@ DATA_DIR=./data
 
 # https://console.mistral.ai/upgrade/plans you can firstly setup your project on Mistral AI Studio with experiment plan (Free)
 
-**3. Build the database** — only needed once, or when CSVs change
+**3. Build the database** - only needed once, or when CSVs change
 ```bash
 python build_db.py
 ```
 
-**4. Index the PDFs** — only needed once, or when new PDFs are added
+**4. Index the PDFs** - only needed once, or when new PDFs are added
 ```bash
 python index.py
 ```
@@ -139,12 +139,12 @@ Open `http://localhost:8000`.
 
 ## A few things worth knowing
 
-**License ID format** — IDs follow the pattern `XX-X-XX-XXXXXX` (e.g. `EU-A-A1-000003`). Mentioning one in your question routes it directly to a lookup or filters the vector search to that specific contract.
+**License ID format** - IDs follow the pattern `XX-X-XX-XXXXXX` (e.g. `EU-A-A1-000003`). Mentioning one in your question routes it directly to a lookup or filters the vector search to that specific contract.
 
-**Scanned PDFs** — Files ending in `_SCAN` are processed with OCR (pytesseract) instead of pdfplumber. Both go through the same chunking and embedding pipeline afterward.
+**Scanned PDFs** - Files ending in `_SCAN` are processed with OCR (pytesseract) instead of pdfplumber. Both go through the same chunking and embedding pipeline afterward.
 
-**SQL generation** — Mistral writes the SQL queries at runtime. The router auto-corrects a few common mistakes the model makes: wrong `ILIKE` syntax, treating date columns as dates instead of VARCHAR, missing `GROUP BY` columns. It's not perfect — complex queries can still fail — but it handles most natural language filters correctly.
+**SQL generation** - Mistral writes the SQL queries at runtime. The router auto-corrects a few common mistakes the model makes: wrong `ILIKE` syntax, treating date columns as dates instead of VARCHAR, missing `GROUP BY` columns. It's not perfect - complex queries can still fail - but it handles most natural language filters correctly.
 
-**Confidence score** — Every response includes a score from 5 to 98. It's a heuristic based on the route, how much context was retrieved, and whether the answer contains phrases like "not found" or "no data". It's useful as a rough signal, not a calibrated probability.
+**Confidence score** - Every response includes a score from 5 to 98. It's a heuristic based on the route, how much context was retrieved, and whether the answer contains phrases like "not found" or "no data". It's useful as a rough signal, not a calibrated probability.
 
-**Conversation history** — The UI keeps the last 6 exchanges and sends them to the LLM on each call, so you can ask follow-up questions without repeating context.
+**Conversation history** - The UI keeps the last 6 exchanges and sends them to the LLM on each call, so you can ask follow-up questions without repeating context.
